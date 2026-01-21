@@ -19,6 +19,7 @@ log-analyzer/
 ├── README.md
 ├── requirements.txt
 ├── .gitignore
+├── main.py
 ├── src/
 │   ├── __init__.py
 │   ├── log_parser.py
@@ -65,13 +66,13 @@ pip install -r requirements.txt
 
 ```bash
 # Basic usage
-python -m src.log_parser data/sample_logs/access.log
+python main.py data/sample_logs/access.log
 
 # With threat detection
-python -m src.log_parser data/sample_logs/access.log --detect-threats
+python main.py data/sample_logs/access.log --detect-threats
 
 # Generate report
-python -m src.log_parser data/sample_logs/access.log --report output/report.json
+python main.py data/sample_logs/access.log --detect-threats --output output/report.json
 ```
 
 ## 📊 Sample Output
@@ -110,7 +111,6 @@ python -m pytest tests/
 
 - [Apache Log Format Documentation](https://httpd.apache.org/docs/current/logs.html)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [Log-Analysis-Projects-for-Beginners](https://github.com/0xrajneesh/Log-Analysis-Projects-for-Beginners/tree/main)
 
 ## 🤝 Contributing
 
@@ -122,4 +122,4 @@ MIT License
 
 ## 👤 Author
 
-Xavier Romano - SOC Analyst in Training
+Your Name - SOC Analyst in Training
