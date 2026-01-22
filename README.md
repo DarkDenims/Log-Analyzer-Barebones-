@@ -128,6 +128,13 @@ python -m pytest tests/
 - [ ] Integration with threat intelligence feeds
 - [ ] API endpoint for programmatic access
 
+### Phase 5: Advanced Analytics 🚀
+- [ ] Geolocation IP mapping
+- [ ] Attack pattern visualization
+- [ ] Historical trend analysis
+- [ ] Traffic heatmaps
+- [ ] Automated threat scoring
+
 ## 📖 Learning Resources
 
 - [Apache Log Format Documentation](https://httpd.apache.org/docs/current/logs.html)
@@ -143,4 +150,4 @@ MIT License
 
 ## 👤 Author
 
-Your Name - SOC Analyst in Training
+Xavier Romano - SOC Analyst in Training
