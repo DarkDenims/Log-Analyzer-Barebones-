@@ -101,11 +101,32 @@ python -m pytest tests/
 
 ## 🛠️ Development Roadmap
 
-- [x] Basic log parsing
-- [ ] Advanced threat detection
-- [ ] Real-time log monitoring
-- [ ] Integration with SIEM tools
-- [ ] Machine learning anomaly detection
+### Phase 1: Core Functionality ✅
+- [x] Basic log parsing with regex
+- [x] Apache Combined Log Format support
+- [x] Threat detection (SQL injection, XSS, path traversal)
+- [x] CLI interface with argparse
+- [x] JSON export functionality
+
+### Phase 2: Enhanced Detection 🔄
+- [ ] Improve brute force detection accuracy
+- [ ] Add command injection detection
+- [ ] Detect credential stuffing attacks
+- [ ] User-Agent based threat detection
+- [ ] Configurable threat thresholds
+
+### Phase 3: Real-Time Capabilities 🎯
+- [ ] Real-time log monitoring (tail -f equivalent)
+- [ ] Alert notifications (email/Slack/Discord)
+- [ ] Dashboard web interface
+- [ ] Live threat feed
+
+### Phase 4: Integration & Automation 🔗
+- [ ] SIEM integration (Splunk, ELK Stack)
+- [ ] CSV export for spreadsheet analysis
+- [ ] Automated report generation
+- [ ] Integration with threat intelligence feeds
+- [ ] API endpoint for programmatic access
 
 ## 📖 Learning Resources
 

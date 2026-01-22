@@ -21,19 +21,19 @@ def main():
         description='Apache Web Server Log Analyzer',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  # Basic analysis
-  python main.py data/sample_logs/access.log
-  
-  # With threat detection
-  python main.py data/sample_logs/access.log --detect-threats
-  
-  # Export to JSON
-  python main.py data/sample_logs/access.log --detect-threats --output report.json
-  
-  # Show only threats
-  python main.py data/sample_logs/access.log --detect-threats --threats-only
-        """
+                Examples:
+                # Basic analysis
+                python main.py data/sample_logs/access.log
+                
+                # With threat detection
+                python main.py data/sample_logs/access.log --detect-threats
+                
+                # Export to JSON
+                python main.py data/sample_logs/access.log --detect-threats --output report.json
+                
+                # Show only threats
+                python main.py data/sample_logs/access.log --detect-threats --threats-only
+                """
     )
     
     parser.add_argument(
