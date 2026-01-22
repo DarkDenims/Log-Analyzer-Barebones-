@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.log_parser import ApacheLogParser
 from src.threat_detector import ThreatDetector
+from src.report_generator import ReportGenerator
 
 
 def main():
@@ -21,19 +22,27 @@ def main():
         description='Apache Web Server Log Analyzer',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-                Examples:
-                # Basic analysis
-                python main.py data/sample_logs/access.log
-                
-                # With threat detection
-                python main.py data/sample_logs/access.log --detect-threats
-                
-                # Export to JSON
-                python main.py data/sample_logs/access.log --detect-threats --output report.json
-                
-                # Show only threats
-                python main.py data/sample_logs/access.log --detect-threats --threats-only
-                """
+Examples:
+  # Basic analysis
+  python main.py data/sample_logs/access.log
+  
+  # With threat detection
+  python main.py data/sample_logs/access.log --detect-threats
+  
+  # Auto-generate timestamped JSON report
+  python main.py data/sample_logs/access.log --detect-threats --format json
+  Output: output/Log-Analysis-2024-01-22_14-30-45.json
+  
+  # Auto-generate timestamped PDF report
+  python main.py data/sample_logs/access.log --detect-threats --format pdf
+  Output: output/Log-Analysis-2024-01-22_14-30-45.pdf
+  
+  # Custom filename
+  python main.py data/sample_logs/access.log --detect-threats --output custom_report.json
+  
+  # Show only threats with auto-generated report
+  python main.py data/sample_logs/access.log --detect-threats --threats-only --format html
+        """
     )
     
     parser.add_argument(
@@ -49,7 +58,21 @@ def main():
     
     parser.add_argument(
         '-o', '--output',
-        help='Output file for JSON report'
+        help='Output file for report (default: auto-generated with timestamp). Supports .json, .csv, .html, .pdf'
+    )
+    
+    parser.add_argument(
+        '--format',
+        choices=['json', 'csv', 'html', 'pdf'],
+        default='json',
+        help='Output format (default: json)'
+    )
+    
+    parser.add_argument(
+        '--csv-type',
+        choices=['threats', 'ips', 'paths'],
+        default='threats',
+        help='CSV report type: threats, ips, or paths (default: threats)'
     )
     
     parser.add_argument(
@@ -63,6 +86,20 @@ def main():
         type=int,
         default=10,
         help='Number of top items to show (default: 10)'
+    )
+    
+    parser.add_argument(
+        '--brute-force-threshold',
+        type=int,
+        default=5,
+        help='Number of failed attempts to trigger brute force alert (default: 5)'
+    )
+    
+    parser.add_argument(
+        '--scanning-threshold',
+        type=int,
+        default=10,
+        help='Number of 404s to trigger scanning alert (default: 10)'
     )
     
     args = parser.parse_args()
@@ -90,18 +127,38 @@ def main():
         print_basic_analysis(log_parser, args.top_n)
     
     # Threat detection
+    threat_detector = None
     if args.detect_threats:
         print("\n" + "="*70)
-        threat_detector = ThreatDetector(entries)
+        threat_detector = ThreatDetector(
+            entries, 
+            brute_force_threshold=args.brute_force_threshold,
+            scanning_threshold=args.scanning_threshold
+        )
         threats = threat_detector.detect_all_threats()
         threat_detector.print_threat_report()
+    
+    # Generate reports
+    if args.output or args.format:
+        report_gen = ReportGenerator(log_parser, threat_detector)
         
-        # Export if requested
-        if args.output:
-            export_full_report(log_parser, threat_detector, args.output)
-    elif args.output:
-        # Export basic report only
-        log_parser.export_to_json(args.output)
+        # Generate default filename if not provided
+        output_file = args.output
+        if not output_file:
+            output_file = generate_default_filename(args.format)
+            print(f"\n[*] No output file specified, using: {output_file}")
+        
+        if args.format == 'json':
+            report_gen.generate_json_report(
+                output_file, 
+                include_threats=(threat_detector is not None)
+            )
+        elif args.format == 'csv':
+            report_gen.generate_csv_report(output_file, args.csv_type)
+        elif args.format == 'html':
+            report_gen.generate_html_report(output_file)
+        elif args.format == 'pdf':
+            report_gen.generate_pdf_report(output_file)
     
     print("\n[+] Analysis complete!")
 
@@ -162,29 +219,12 @@ def get_status_description(status_code):
     return descriptions.get(status_code, "Unknown")
 
 
-def export_full_report(log_parser, threat_detector, output_file):
-    """Export comprehensive report including threats"""
-    report = {
-        'basic_analysis': log_parser.generate_summary_report(),
-        'threat_analysis': threat_detector.get_threat_summary(),
-        'threats': [
-            {
-                'type': t.threat_type,
-                'ip': t.ip,
-                'path': t.path,
-                'timestamp': t.timestamp,
-                'severity': t.severity,
-                'description': t.description
-            }
-            for t in threat_detector.threats
-        ]
-    }
-    
-    with open(output_file, 'w') as f:
-        json.dump(report, f, indent=2)
-    
-    print(f"\n[+] Full report exported to: {output_file}")
-
+def generate_default_filename(format_type):
+    """Generate timestamped filename for reports"""
+    from datetime import datetime
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    filename = f"output/Log-Analysis-{timestamp}.{format_type}"
+    return filename
 
 if __name__ == '__main__':
     main()

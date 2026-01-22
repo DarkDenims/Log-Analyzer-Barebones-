@@ -9,3 +9,10 @@ colorama>=0.4.6
 # Optional: For data export
 pandas>=2.0.0
 matplotlib>=3.7.0
+
+# Optional: For PDF generation (requires wkhtmltopdf installed on system)
+# Installation: 
+#   Windows: Download from https://wkhtmltopdf.org/downloads.html
+#   macOS: brew install wkhtmltopdf
+#   Linux: sudo apt-get install wkhtmltopdf
+pdfkit>=1.0.0

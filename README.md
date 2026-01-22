@@ -40,7 +40,7 @@ log-analyzer/
 - **Threat Detection**: Identify common attack patterns
 - **IP Analysis**: Track suspicious IP addresses
 - **Statistical Reports**: Generate insights from log data
-- **Export Results**: Save findings to JSON/CSV
+- **Export Results**: Save findings to JSON/CSV/HTML/PDF
 
 ## 📋 Requirements
 
@@ -60,6 +60,11 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Optional: For PDF generation, install wkhtmltopdf
+# Windows: Download from https://wkhtmltopdf.org/downloads.html
+# macOS: brew install wkhtmltopdf
+# Linux: sudo apt-get install wkhtmltopdf
 ```
 
 ## 💻 Usage
@@ -71,8 +76,29 @@ python main.py data/sample_logs/access.log
 # With threat detection
 python main.py data/sample_logs/access.log --detect-threats
 
-# Generate report
+# Auto-generate filename with timestamp (saves to output/Log-Analysis-YYYY-MM-DD_HH-MM-SS.json)
+python main.py data/sample_logs/access.log --detect-threats --format json
+
+# Specify custom filename
 python main.py data/sample_logs/access.log --detect-threats --output output/report.json
+
+# Generate HTML report with auto-filename
+python main.py data/sample_logs/access.log --detect-threats --format html
+
+# Generate PDF report (requires wkhtmltopdf)
+python main.py data/sample_logs/access.log --detect-threats --format pdf
+
+# Generate CSV report (threats) with auto-filename
+python main.py data/sample_logs/access.log --detect-threats --format csv
+
+# Generate CSV report (top IPs) with custom name
+python main.py data/sample_logs/access.log --output output/ips.csv --format csv --csv-type ips
+
+# Custom thresholds with auto-generated PDF
+python main.py data/sample_logs/access.log --detect-threats \
+  --brute-force-threshold 3 \
+  --scanning-threshold 5 \
+  --format pdf
 ```
 
 ## 📊 Sample Output
@@ -109,11 +135,11 @@ python -m pytest tests/
 - [x] JSON export functionality
 
 ### Phase 2: Enhanced Detection 🔄
-- [ ] Improve brute force detection accuracy
-- [ ] Add command injection detection
+- [x] Improve brute force detection accuracy
+- [x] Add command injection detection
+- [x] Configurable threat thresholds
 - [ ] Detect credential stuffing attacks
 - [ ] User-Agent based threat detection
-- [ ] Configurable threat thresholds
 
 ### Phase 3: Real-Time Capabilities 🎯
 - [ ] Real-time log monitoring (tail -f equivalent)
@@ -123,7 +149,8 @@ python -m pytest tests/
 
 ### Phase 4: Integration & Automation 🔗
 - [ ] SIEM integration (Splunk, ELK Stack)
-- [ ] CSV export for spreadsheet analysis
+- [x] CSV export for spreadsheet analysis
+- [x] PDF export for executive reports
 - [ ] Automated report generation
 - [ ] Integration with threat intelligence feeds
 - [ ] API endpoint for programmatic access
@@ -139,6 +166,7 @@ python -m pytest tests/
 
 - [Apache Log Format Documentation](https://httpd.apache.org/docs/current/logs.html)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- [Log-Analysis-Projects-for-Beginners](https://github.com/0xrajneesh/Log-Analysis-Projects-for-Beginners/tree/main)
 
 ## 🤝 Contributing
 

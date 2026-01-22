@@ -58,10 +58,12 @@ class ThreatDetector:
         r"`.*`",
     ]
     
-    def __init__(self, entries):
+    def __init__(self, entries, brute_force_threshold=5, scanning_threshold=10):
         self.entries = entries
         self.threats: List[ThreatAlert] = []
         self.ip_threat_count = Counter()
+        self.brute_force_threshold = brute_force_threshold
+        self.scanning_threshold = scanning_threshold
         
     def detect_all_threats(self) -> List[ThreatAlert]:
         """Run all threat detection methods"""
@@ -154,9 +156,9 @@ class ThreatDetector:
             if entry.status in [401, 403]:
                 failed_attempts[entry.ip].append(entry)
         
-        # Flag IPs with more than 10 failed attempts
+        # Flag IPs with attempts >= threshold
         for ip, attempts in failed_attempts.items():
-            if len(attempts) >= 10:
+            if len(attempts) >= self.brute_force_threshold:
                 self.threats.append(ThreatAlert(
                     threat_type="BRUTE_FORCE",
                     ip=ip,
@@ -175,9 +177,9 @@ class ThreatDetector:
             if entry.status == 404:
                 not_found[entry.ip].append(entry)
         
-        # Flag IPs with more than 20 404s
+        # Flag IPs with 404s >= threshold
         for ip, attempts in not_found.items():
-            if len(attempts) >= 20:
+            if len(attempts) >= self.scanning_threshold:
                 self.threats.append(ThreatAlert(
                     threat_type="SCANNING",
                     ip=ip,

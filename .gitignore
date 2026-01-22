@@ -44,7 +44,9 @@ Thumbs.db
 output/*.json
 output/*.csv
 output/*.html
+output/*.pdf
 !output/.gitkeep
+
 
 # Log files (except samples)
 *.log
