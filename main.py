@@ -17,6 +17,13 @@ from src.threat_detector import ThreatDetector
 from src.report_generator import ReportGenerator
 
 
+def generate_default_filename(format_type: str) -> str:
+    """Generate default filename with timestamp"""
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    return f"output/Log-Analysis-{timestamp}.{format_type}"
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Apache Web Server Log Analyzer',
@@ -102,6 +109,13 @@ Examples:
         help='Number of 404s to trigger scanning alert (default: 10)'
     )
     
+    parser.add_argument(
+        '--credential-stuffing-threshold',
+        type=int,
+        default=5,
+        help='Number of different usernames to trigger credential stuffing alert (default: 5)'
+    )
+    
     args = parser.parse_args()
     
     # Validate log file exists
@@ -133,7 +147,8 @@ Examples:
         threat_detector = ThreatDetector(
             entries, 
             brute_force_threshold=args.brute_force_threshold,
-            scanning_threshold=args.scanning_threshold
+            scanning_threshold=args.scanning_threshold,
+            credential_stuffing_threshold=args.credential_stuffing_threshold
         )
         threats = threat_detector.detect_all_threats()
         threat_detector.print_threat_report()
@@ -218,13 +233,6 @@ def get_status_description(status_code):
     }
     return descriptions.get(status_code, "Unknown")
 
-
-def generate_default_filename(format_type):
-    """Generate timestamped filename for reports"""
-    from datetime import datetime
-    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    filename = f"output/Log-Analysis-{timestamp}.{format_type}"
-    return filename
 
 if __name__ == '__main__':
     main()

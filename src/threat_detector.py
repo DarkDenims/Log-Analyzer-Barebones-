@@ -58,12 +58,39 @@ class ThreatDetector:
         r"`.*`",
     ]
     
-    def __init__(self, entries, brute_force_threshold=5, scanning_threshold=10):
+    # Suspicious User-Agent patterns
+    SUSPICIOUS_USER_AGENTS = [
+        r"nikto",
+        r"sqlmap",
+        r"nmap",
+        r"masscan",
+        r"metasploit",
+        r"burp\s?suite",
+        r"acunetix",
+        r"nessus",
+        r"openvas",
+        r"vega",
+        r"grabber",
+        r"w3af",
+        r"dirbuster",
+        r"gobuster",
+        r"wpscan",
+        r"skipfish",
+        r"havij",
+        r"\.nasl",  # Nessus script
+        r"python-requests(?!/\d)",  # python-requests without version (often malicious)
+        r"curl(?!/\d)",  # curl without version
+        r"^-$",  # Empty user agent
+        r"^$",  # Missing user agent
+    ]
+    
+    def __init__(self, entries, brute_force_threshold=5, scanning_threshold=10, credential_stuffing_threshold=5):
         self.entries = entries
         self.threats: List[ThreatAlert] = []
         self.ip_threat_count = Counter()
         self.brute_force_threshold = brute_force_threshold
         self.scanning_threshold = scanning_threshold
+        self.credential_stuffing_threshold = credential_stuffing_threshold
         
     def detect_all_threats(self) -> List[ThreatAlert]:
         """Run all threat detection methods"""
@@ -117,9 +144,24 @@ class ThreatDetector:
                     description="Command injection attempt detected"
                 ))
                 self.ip_threat_count[entry.ip] += 1
+            
+            # Suspicious User-Agent
+            if self._check_suspicious_user_agent(entry):
+                self.threats.append(ThreatAlert(
+                    threat_type="SUSPICIOUS_USER_AGENT",
+                    ip=entry.ip,
+                    path=entry.user_agent[:80],  # Store user agent in path field
+                    timestamp=entry.timestamp,
+                    severity="MEDIUM",
+                    description=f"Suspicious/malicious user agent: {entry.user_agent[:50]}"
+                ))
+                self.ip_threat_count[entry.ip] += 1
         
         # Detect brute force
         self._detect_brute_force()
+        
+        # Detect credential stuffing
+        self._detect_credential_stuffing()
         
         # Detect scanning activity
         self._detect_scanning()
@@ -147,6 +189,21 @@ class ThreatDetector:
         path = entry.path.lower()
         return any(re.search(pattern, path, re.IGNORECASE) for pattern in self.CMD_INJECTION_PATTERNS)
     
+    def _check_suspicious_user_agent(self, entry) -> bool:
+        """Check for suspicious/malicious user agents"""
+        user_agent = entry.user_agent.lower()
+        
+        # Check against known scanner patterns
+        for pattern in self.SUSPICIOUS_USER_AGENTS:
+            if re.search(pattern, user_agent, re.IGNORECASE):
+                return True
+        
+        # Check for empty or suspiciously short user agents
+        if len(user_agent.strip()) == 0 or user_agent == "-":
+            return True
+        
+        return False
+    
     def _detect_brute_force(self):
         """Detect potential brute force attempts"""
         # Count failed logins per IP (401/403 status codes)
@@ -166,6 +223,44 @@ class ThreatDetector:
                     timestamp=attempts[0].timestamp,
                     severity="HIGH",
                     description=f"Possible brute force attack: {len(attempts)} failed auth attempts"
+                ))
+                self.ip_threat_count[ip] += 1
+    
+    def _detect_credential_stuffing(self):
+        """Detect credential stuffing attacks (many different usernames from same IP)"""
+        # Track login attempts by IP and extract usernames from paths
+        ip_usernames = defaultdict(set)
+        ip_attempts = defaultdict(list)
+        
+        for entry in self.entries:
+            # Look for login endpoints with username parameters
+            if any(login_path in entry.path.lower() for login_path in ['/login', '/signin', '/auth', '/admin']):
+                # Try to extract username from common parameter names
+                import urllib.parse
+                
+                # Parse query parameters
+                if '?' in entry.path:
+                    query_string = entry.path.split('?', 1)[1]
+                    params = urllib.parse.parse_qs(query_string)
+                    
+                    # Look for common username parameters
+                    for username_param in ['user', 'username', 'email', 'login', 'account', 'id']:
+                        if username_param in params:
+                            username = params[username_param][0]
+                            ip_usernames[entry.ip].add(username)
+                            ip_attempts[entry.ip].append(entry)
+                            break
+        
+        # Flag IPs trying multiple different usernames
+        for ip, usernames in ip_usernames.items():
+            if len(usernames) >= self.credential_stuffing_threshold:
+                self.threats.append(ThreatAlert(
+                    threat_type="CREDENTIAL_STUFFING",
+                    ip=ip,
+                    path=f"{len(usernames)} different usernames, {len(ip_attempts[ip])} attempts",
+                    timestamp=ip_attempts[ip][0].timestamp,
+                    severity="HIGH",
+                    description=f"Possible credential stuffing: {len(usernames)} unique usernames tried"
                 ))
                 self.ip_threat_count[ip] += 1
     

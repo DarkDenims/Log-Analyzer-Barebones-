@@ -5,16 +5,10 @@ Generates various report formats from log analysis and threat detection results
 
 import json
 import csv
+import pdfkit
 from typing import Dict, List
 from datetime import datetime
 from pathlib import Path
-
-# PDF support - optional dependency
-try:
-    import pdfkit
-    PDF_AVAILABLE = True
-except ImportError:
-    PDF_AVAILABLE = False
 
 
 class ReportGenerator:
@@ -87,11 +81,6 @@ class ReportGenerator:
               * macOS: brew install wkhtmltopdf
               * Linux: sudo apt-get install wkhtmltopdf
         """
-        if not PDF_AVAILABLE:
-            print("[!] Error: pdfkit not installed. Install with: pip install pdfkit")
-            print("[!] Also ensure wkhtmltopdf is installed on your system")
-            return
-        
         try:
             # Generate HTML content
             html_content = self._build_html_report()

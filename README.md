@@ -134,12 +134,12 @@ python -m pytest tests/
 - [x] CLI interface with argparse
 - [x] JSON export functionality
 
-### Phase 2: Enhanced Detection 🔄
+### Phase 2: Enhanced Detection ✅
 - [x] Improve brute force detection accuracy
 - [x] Add command injection detection
 - [x] Configurable threat thresholds
-- [ ] Detect credential stuffing attacks
-- [ ] User-Agent based threat detection
+- [x] Detect credential stuffing attacks
+- [x] User-Agent based threat detection
 
 ### Phase 3: Real-Time Capabilities 🎯
 - [ ] Real-time log monitoring (tail -f equivalent)
