@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.log_parser import ApacheLogParser
 from src.threat_detector import ThreatDetector
 from src.report_generator import ReportGenerator
+from src.log_monitor import LogMonitor
 
 
 def generate_default_filename(format_type: str) -> str:
@@ -55,6 +56,12 @@ Examples:
     parser.add_argument(
         'logfile',
         help='Path to Apache log file'
+    )
+    
+    parser.add_argument(
+        '-m', '--monitor',
+        action='store_true',
+        help='Monitor log file in real-time (like tail -f)'
     )
     
     parser.add_argument(
@@ -122,6 +129,13 @@ Examples:
     if not Path(args.logfile).exists():
         print(f"[!] Error: Log file not found: {args.logfile}")
         sys.exit(1)
+    
+    # Real-time monitoring mode
+    if args.monitor:
+        threat_config = {'enabled': True} if args.detect_threats else None
+        monitor = LogMonitor(args.logfile, threat_detector_config=threat_config)
+        monitor.start()
+        return
     
     print("="*70)
     print("APACHE WEB SERVER LOG ANALYZER")
