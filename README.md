@@ -76,7 +76,14 @@ python main.py data/sample_logs/access.log
 # With threat detection
 python main.py data/sample_logs/access.log --detect-threats
 
-# Auto-generate filename with timestamp (saves to output/Log-Analysis-YYYY-MM-DD_HH-MM-SS.json)
+# Real-time monitoring (NEW!)
+python main.py --monitor /var/log/apache2/access.log --detect-threats
+
+# Test real-time monitoring with simulator
+python simulate_logs.py -i 1  # Terminal 1
+python main.py --monitor data/sample_logs/live.log --detect-threats  # Terminal 2
+
+# Auto-generate filename with timestamp
 python main.py data/sample_logs/access.log --detect-threats --format json
 
 # Specify custom filename
@@ -87,12 +94,6 @@ python main.py data/sample_logs/access.log --detect-threats --format html
 
 # Generate PDF report (requires wkhtmltopdf)
 python main.py data/sample_logs/access.log --detect-threats --format pdf
-
-# Generate CSV report (threats) with auto-filename
-python main.py data/sample_logs/access.log --detect-threats --format csv
-
-# Generate CSV report (top IPs) with custom name
-python main.py data/sample_logs/access.log --output output/ips.csv --format csv --csv-type ips
 
 # Custom thresholds with auto-generated PDF
 python main.py data/sample_logs/access.log --detect-threats \
@@ -141,9 +142,9 @@ python -m pytest tests/
 - [x] Detect credential stuffing attacks
 - [x] User-Agent based threat detection
 
-### Phase 3: Real-Time Capabilities 🎯
-- [ ] Real-time log monitoring (tail -f equivalent)
-- [ ] Alert notifications (email/Slack/Discord)
+### Phase 3: Real-Time Capabilities 🔄
+- [x] Real-time log monitoring (tail -f equivalent)
+- [ ] Alert notifications (Discord webhooks)
 - [ ] Dashboard web interface
 - [ ] Live threat feed
 
